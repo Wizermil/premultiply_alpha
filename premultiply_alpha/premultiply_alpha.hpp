@@ -103,11 +103,11 @@ namespace v3 {
 
         std::size_t const max_simd_pixel = pixel * sizeof(std::uint32_t) / sizeof(__m128i);
 
-        __m128i const odd_mask = _mm_set1_epi16(static_cast<short>(0xFF00));
+        __m128i const mask_alphha_color_odd_255 = _mm_set1_epi32(0xff000000);
         __m128i const div_255 = _mm_set1_epi16(static_cast<short>(0x8081));
 
         __m128i const mask_shuffle_alpha = _mm_set_epi32(0x0f800f80, 0x0b800b80, 0x07800780, 0x03800380);
-        __m128i const mask_blend_alpha = _mm_set_epi32(0x80000000, 0x80000000, 0x80000000, 0x80000000);
+        __m128i const mask_shuffle_color_odd = _mm_set_epi32(0x80800d80, 0x80800980, 0x80800580, 0x80800180);
 
         __m128i color, alpha, color_even, color_odd;
         for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + max_simd_pixel; ptr != end; ++ptr) {
@@ -116,7 +116,8 @@ namespace v3 {
             alpha = _mm_shuffle_epi8(color, mask_shuffle_alpha);
 
             color_even = _mm_slli_epi16(color, 8);
-            color_odd = _mm_and_si128(color, odd_mask);
+            color_odd = _mm_shuffle_epi8(color, mask_shuffle_color_odd);
+            color_odd = _mm_or_si128(color_odd, mask_alphha_color_odd_255);
 
             color_odd = _mm_mulhi_epu16(color_odd, alpha);
             color_even = _mm_mulhi_epu16(color_even, alpha);
@@ -125,7 +126,6 @@ namespace v3 {
             color_even = _mm_srli_epi16(_mm_mulhi_epu16(color_even, div_255), 7);
 
             color = _mm_or_si128(color_even, _mm_slli_epi16(color_odd, 8));
-            color = _mm_blendv_epi8(color, alpha, mask_blend_alpha);
 
             _mm_store_si128(ptr, color);
         }
@@ -198,6 +198,63 @@ namespace v4 {
         }
 
         std::size_t const processed_pixel = max_simd_pixel * sizeof(__m128i) * 2 / sizeof(std::uint32_t);
+        std::size_t const remaining_pixel = pixel - processed_pixel;
+        premultiply_alpha_plain(data + processed_pixel, remaining_pixel);
+    }
+#    endif
+#endif
+}
+
+// v5
+
+namespace v5 {
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
+            auto const a =  (p >> 24) & 0xFFU;
+            auto const r = ((p >> 0) & 0xFFU) * a / 255U;
+            auto const g = ((p >> 8) & 0xFFU) * a / 255U;
+            auto const b = ((p >> 16) & 0xFFU) * a / 255U;
+
+            return (a << 24) | (b << 16) | (g << 8) | (r << 0);
+        });
+    }
+
+#if !defined(NSIMD)
+#    if defined(__i386__) || defined(__x86_64__)
+    inline void premultiply_alpha_simd_x86(std::uint32_t* data, std::size_t pixel) noexcept {
+        assert((reinterpret_cast<std::uintptr_t>(data) & 15) == 0);
+
+        std::size_t const max_simd_pixel = pixel * sizeof(std::uint32_t) / sizeof(__m256i);
+
+
+        __m256i const mask_alphha_color_odd_255 = _mm256_set1_epi32(0xff000000);
+        __m256i const div_255 = _mm256_set1_epi16(static_cast<short>(0x8081));
+
+        __m256i const mask_shuffle_alpha = _mm256_set_epi32(0x0f800f80, 0x0b800b80, 0x07800780, 0x03800380, 0x0f800f80, 0x0b800b80, 0x07800780, 0x03800380);
+        __m256i const mask_shuffle_color_odd = _mm256_set_epi32(0x80800d80, 0x80800980, 0x80800580, 0x80800180, 0x80800d80, 0x80800980, 0x80800580, 0x80800180);
+
+        __m256i color, alpha, color_even, color_odd;
+        for (__m256i *ptr = reinterpret_cast<__m256i*>(data), *end = ptr + max_simd_pixel; ptr != end; ++ptr) {
+            color = _mm256_load_si256(ptr);
+
+            alpha = _mm256_shuffle_epi8(color, mask_shuffle_alpha);
+
+            color_even = _mm256_slli_epi16(color, 8);
+            color_odd = _mm256_shuffle_epi8(color, mask_shuffle_color_odd);
+            color_odd = _mm256_or_si256(color_odd, mask_alphha_color_odd_255);
+
+            color_odd = _mm256_mulhi_epu16(color_odd, alpha);
+            color_even = _mm256_mulhi_epu16(color_even, alpha);
+
+            color_odd = _mm256_srli_epi16(_mm256_mulhi_epu16(color_odd, div_255), 7);
+            color_even = _mm256_srli_epi16(_mm256_mulhi_epu16(color_even, div_255), 7);
+
+            color = _mm256_or_si256(color_even, _mm256_slli_epi16(color_odd, 8));
+
+            _mm256_store_si256(ptr, color);
+        }
+
+        std::size_t const processed_pixel = max_simd_pixel * sizeof(__m256i) / sizeof(std::uint32_t);
         std::size_t const remaining_pixel = pixel - processed_pixel;
         premultiply_alpha_plain(data + processed_pixel, remaining_pixel);
     }

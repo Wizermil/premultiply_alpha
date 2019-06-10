@@ -11,30 +11,34 @@ CPU Caches:
   L1 Instruction 32K (x4)
   L2 Unified 262K (x4)
   L3 Unified 8388K (x1)
-Load Average: 1.32, 1.46, 1.36
 -----------------------------------------------------------------------------
 Benchmark                   Time             CPU   Iterations UserCounters...
 -----------------------------------------------------------------------------
-v1_plain_mean         1196208 ns      1195879 ns          100 itr=836.322/s
-v1_plain_median       1193821 ns      1193583 ns          100 itr=837.814/s
-v1_plain_stddev         14524 ns        14333 ns          100 itr=9.86728/s
+v1_plain_mean         1197390 ns      1197014 ns          100 itr=835.516/s
+v1_plain_median       1193932 ns      1193557 ns          100 itr=837.832/s
+v1_plain_stddev         13772 ns        13562 ns          100 itr=9.3182/s
 
-v1_simd_x86_mean       300903 ns       300829 ns          100 itr=3.32659k/s
-v1_simd_x86_median     300238 ns       300102 ns          100 itr=3.3322k/s
-v1_simd_x86_stddev       8375 ns         8367 ns          100 itr=88.9029/s
+v1_simd_x86_mean       301928 ns       301826 ns          100 itr=3.31563k/s
+v1_simd_x86_median     300827 ns       300759 ns          100 itr=3.32492k/s
+v1_simd_x86_stddev       8375 ns         8335 ns          100 itr=89.898/s
 
 Thanks Dot and Beached (discord #include)
-v2_plain_mean          321179 ns       321102 ns          100 itr=3.11552k/s
-v2_plain_median        319993 ns       319963 ns          100 itr=3.12537k/s
-v2_plain_stddev          6499 ns         6485 ns          100 itr=61.8953/s
+v2_plain_mean          322754 ns       322692 ns          100 itr=3.10078k/s
+v2_plain_median        320691 ns       320615 ns          100 itr=3.11901k/s
+v2_plain_stddev          8015 ns         8007 ns          100 itr=75.2172/s
 
 Thanks Peter Cordes (stackoverflow)
-v3_simd_x86_mean       260714 ns       260654 ns          100 itr=3.83899k/s
-v3_simd_x86_median     259644 ns       259613 ns          100 itr=3.85188k/s
-v3_simd_x86_stddev       6800 ns         6785 ns          100 itr=96.3051/s
+v3_simd_x86_mean       246171 ns       246107 ns          100 itr=4.06517k/s
+v3_simd_x86_median     245191 ns       245167 ns          100 itr=4.07885k/s
+v3_simd_x86_stddev       5423 ns         5406 ns          100 itr=87.13/s
 
 Thanks chtz (stackoverflow)
-v4_simd_x86_mean       263912 ns       263844 ns          100 itr=3.79343k/s
-v4_simd_x86_median     262171 ns       262134 ns          100 itr=3.81484k/s
-v4_simd_x86_stddev       8038 ns         8012 ns          100 itr=110.046/s
+v4_simd_x86_mean       262580 ns       262495 ns          100 itr=3.81245k/s
+v4_simd_x86_median     260326 ns       260258 ns          100 itr=3.84234k/s
+v4_simd_x86_stddev       7447 ns         7382 ns          100 itr=102.565/s
+
+Thanks Peter Cordes and chtz (stackoverflow) for AVX2
+v5_simd_x86_mean       158456 ns       158409 ns          100 itr=6.31411k/s
+v5_simd_x86_median     158248 ns       158165 ns          100 itr=6.3225k/s
+v5_simd_x86_stddev       2340 ns         2329 ns          100 itr=92.1406/s
 ```

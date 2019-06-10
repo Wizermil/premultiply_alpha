@@ -64,6 +64,16 @@ namespace pma {
         state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
         delete[] data;
     }
+
+    void v5_simd_x86(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("v5::simd_x86 - AVX2");
+        for (auto _ : state) {
+            v5::premultiply_alpha_simd_x86(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
 #    endif
 #endif
 }

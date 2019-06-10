@@ -20,6 +20,7 @@ namespace pma {
 #    if defined(__i386__) || defined(__x86_64__)
     BENCHMARK(v3_simd_x86);
     BENCHMARK(v4_simd_x86);
+    BENCHMARK(v5_simd_x86);
 #    endif
 #endif
 }
@@ -44,6 +45,8 @@ int main(int argc, char** argv) {
     CHECK(v3::premultiply_alpha_simd_x86);
 
     CHECK(v4::premultiply_alpha_simd_x86);
+
+    CHECK(v5::premultiply_alpha_simd_x86);
 #    endif
 #endif
 
