@@ -16,20 +16,21 @@
 // v1
 
 namespace v1 {
-    inline void premultiply_alpha_plain(std::uint8_t* data, std::size_t pixels) noexcept {
-        for (std::size_t i = 0; i < pixels; i+=4) {
-            data[i] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(data[i] * data[i+3]) / static_cast<std::uint16_t>(255));
-            data[i+1] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(data[i+1] * data[i+3]) / static_cast<std::uint16_t>(255));
-            data[i+2] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(data[i+2] * data[i+3]) / static_cast<std::uint16_t>(255));
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::uint8_t* bytes = reinterpret_cast<std::uint8_t*>(data);
+        for (std::size_t i = 0, max = pixel << 2; i < max; i+=4) {
+            bytes[i] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(bytes[i] * bytes[i+3]) / static_cast<std::uint16_t>(255));
+            bytes[i+1] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(bytes[i+1] * bytes[i+3]) / static_cast<std::uint16_t>(255));
+            bytes[i+2] = static_cast<std::uint8_t>(static_cast<std::uint16_t>(bytes[i+2] * bytes[i+3]) / static_cast<std::uint16_t>(255));
         }
     }
 
 #if !defined(NSIMD)
 #    if defined(__i386__) || defined(__x86_64__)
-    inline void premultiply_alpha_simd_x86(std::uint8_t* data, std::size_t pixels) noexcept {
+    inline void premultiply_alpha_simd_x86(std::uint32_t* data, std::size_t pixel) noexcept {
         assert((reinterpret_cast<std::uintptr_t>(data) & 15) == 0);
 
-        std::size_t const max_simd_pixels = pixels / sizeof(__m128i);
+        std::size_t const max_simd_pixel = pixel * sizeof(std::uint32_t) / sizeof(__m128i);
 
         __m128i const alpha_mask = _mm_set1_epi32(static_cast<int>(0xFF000000));
         __m128i const alpha_mask_one_comp = _mm_set1_epi32(static_cast<int>(0x00FFFFFF));
@@ -37,7 +38,7 @@ namespace v1 {
         __m128i const div_255 = _mm_set1_epi16(static_cast<short>(0x8081));
 
         __m128i color, alpha, color_even, color_odd;
-        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + max_simd_pixels; ptr != end; ++ptr) {
+        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + max_simd_pixel; ptr != end; ++ptr) {
             color = _mm_load_si128(ptr);
 
             alpha = _mm_and_si128(color, alpha_mask);
@@ -58,9 +59,9 @@ namespace v1 {
             _mm_store_si128(ptr, color);
         }
 
-        std::size_t const processed_pixels = max_simd_pixels * sizeof(__m128i);
-        std::size_t const remaining_pixels = pixels - processed_pixels;
-        premultiply_alpha_plain(data + processed_pixels, remaining_pixels);
+        std::size_t const processed_pixel = max_simd_pixel * sizeof(__m128i) / sizeof(std::uint32_t);
+        std::size_t const remaining_pixel = pixel - processed_pixel;
+        premultiply_alpha_plain(data + processed_pixel, remaining_pixel);
     }
 #    endif
 #endif
@@ -69,8 +70,8 @@ namespace v1 {
 // v2
 
 namespace v2 {
-    inline void premultiply_alpha_plain(std::uint8_t* data, std::size_t pixels) noexcept {
-        std::transform(reinterpret_cast<std::uint32_t*>(data), reinterpret_cast<std::uint32_t*>(data) + pixels / 4, reinterpret_cast<std::uint32_t*>(data), [](std::uint32_t p) noexcept {
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
             auto const a =  (p >> 24) & 0xFFU;
             auto const r = ((p >> 0) & 0xFFU) * a / 255U;
             auto const g = ((p >> 8) & 0xFFU) * a / 255U;
@@ -84,8 +85,8 @@ namespace v2 {
 // v3
 
 namespace v3 {
-    inline void premultiply_alpha_plain(std::uint8_t* data, std::size_t pixels) noexcept {
-        std::transform(reinterpret_cast<std::uint32_t*>(data), reinterpret_cast<std::uint32_t*>(data) + pixels / 4, reinterpret_cast<std::uint32_t*>(data), [](std::uint32_t p) noexcept {
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
             auto const a =  (p >> 24) & 0xFFU;
             auto const r = ((p >> 0) & 0xFFU) * a / 255U;
             auto const g = ((p >> 8) & 0xFFU) * a / 255U;
@@ -97,10 +98,10 @@ namespace v3 {
 
 #if !defined(NSIMD)
 #    if defined(__i386__) || defined(__x86_64__)
-    inline void premultiply_alpha_simd_x86(std::uint8_t* data, std::size_t pixels) noexcept {
+    inline void premultiply_alpha_simd_x86(std::uint32_t* data, std::size_t pixel) noexcept {
         assert((reinterpret_cast<std::uintptr_t>(data) & 15) == 0);
 
-        std::size_t const max_simd_pixels = pixels / sizeof(__m128i);
+        std::size_t const max_simd_pixel = pixel * sizeof(std::uint32_t) / sizeof(__m128i);
 
         __m128i const odd_mask = _mm_set1_epi16(static_cast<short>(0xFF00));
         __m128i const div_255 = _mm_set1_epi16(static_cast<short>(0x8081));
@@ -109,7 +110,7 @@ namespace v3 {
         __m128i const mask_blend_alpha = _mm_set_epi32(0x80000000, 0x80000000, 0x80000000, 0x80000000);
 
         __m128i color, alpha, color_even, color_odd;
-        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + max_simd_pixels; ptr != end; ++ptr) {
+        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + max_simd_pixel; ptr != end; ++ptr) {
             color = _mm_load_si128(ptr);
 
             alpha = _mm_shuffle_epi8(color, mask_shuffle_alpha);
@@ -129,9 +130,9 @@ namespace v3 {
             _mm_store_si128(ptr, color);
         }
 
-        std::size_t const processed_pixels = max_simd_pixels * sizeof(__m128i);
-        std::size_t const remaining_pixels = pixels - processed_pixels;
-        premultiply_alpha_plain(data + processed_pixels, remaining_pixels);
+        std::size_t const processed_pixel = max_simd_pixel * sizeof(__m128i) / sizeof(std::uint32_t);
+        std::size_t const remaining_pixel = pixel - processed_pixel;
+        premultiply_alpha_plain(data + processed_pixel, remaining_pixel);
     }
 #    endif
 #endif
@@ -140,8 +141,8 @@ namespace v3 {
 // v4
 
 namespace v4 {
-    inline void premultiply_alpha_plain(std::uint8_t* data, std::size_t pixels) noexcept {
-        std::transform(reinterpret_cast<std::uint32_t*>(data), reinterpret_cast<std::uint32_t*>(data) + pixels / 4, reinterpret_cast<std::uint32_t*>(data), [](std::uint32_t p) noexcept {
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
             auto const a =  (p >> 24) & 0xFFU;
             auto const r = ((p >> 0) & 0xFFU) * a / 255U;
             auto const g = ((p >> 8) & 0xFFU) * a / 255U;
@@ -153,12 +154,12 @@ namespace v4 {
 
 #if !defined(NSIMD)
 #    if defined(__i386__) || defined(__x86_64__)
-    inline void premultiply_alpha_simd_x86(std::uint8_t* data, std::size_t pixels) noexcept {
+    inline void premultiply_alpha_simd_x86(std::uint32_t* data, std::size_t pixel) noexcept {
         assert((reinterpret_cast<std::uintptr_t>(data) & 15) == 0);
 
-        std::size_t const max_simd_pixels = pixels / (sizeof(__m128i) * 2);
+        std::size_t const max_simd_pixel = pixel * sizeof(std::uint32_t) / (sizeof(__m128i) * 2);
 
-        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + (max_simd_pixels * 2); ptr != end; ptr += 2) {
+        for (__m128i *ptr = reinterpret_cast<__m128i*>(data), *end = ptr + (max_simd_pixel * 2); ptr != end; ptr += 2) {
             // load data and split channels:
             __m128i abgr = _mm_load_si128(ptr);
             __m128i ABGR = _mm_load_si128(ptr+1);
@@ -196,10 +197,24 @@ namespace v4 {
             _mm_store_si128(ptr+1, ABGR);
         }
 
-        std::size_t const processed_pixels = max_simd_pixels * sizeof(__m128i) * 2;
-        std::size_t const remaining_pixels = pixels - processed_pixels;
-        premultiply_alpha_plain(data + processed_pixels, remaining_pixels);
+        std::size_t const processed_pixel = max_simd_pixel * sizeof(__m128i) * 2 / sizeof(std::uint32_t);
+        std::size_t const remaining_pixel = pixel - processed_pixel;
+        premultiply_alpha_plain(data + processed_pixel, remaining_pixel);
     }
 #    endif
 #endif
+}
+
+// v5
+
+namespace v5 {
+    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
+        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
+            auto const a =  p >> 24;
+            auto const b = p >> 16 & 0xFFU * a / 255U;
+            auto const g = p >> 8 & 0xFFU * a / 255U;
+            auto const r = p & 0xFFU * a / 255U;
+            return a << 24 | b << 16 | g << 8 | r;
+        });
+    }
 }

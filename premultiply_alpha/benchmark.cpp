@@ -3,11 +3,11 @@
 #include "cat.hpp"
 #include "premultiply_alpha.hpp"
 
-static constexpr std::size_t const max_pixel = cat::width * cat::height * 4;
+static constexpr std::size_t const max_pixel = cat::width * cat::height;
 
-static std::uint8_t* setup() noexcept {
-    std::uint8_t* data = new std::uint8_t[max_pixel];
-    std::memcpy(data, cat::image, max_pixel);
+static std::uint32_t* setup() noexcept {
+    std::uint32_t* data = new std::uint32_t[max_pixel];
+    std::memcpy(data, cat::image, max_pixel * sizeof(std::uint32_t));
     return data;
 }
 
@@ -28,6 +28,16 @@ namespace pma {
         state.SetLabel("v2::plain - Dot and Beached (discord #include)");
         for (auto _ : state) {
             v2::premultiply_alpha_plain(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
+    void v5_plain(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("v5::plain");
+        for (auto _ : state) {
+            v5::premultiply_alpha_plain(data, max_pixel);
         }
         state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
         delete[] data;

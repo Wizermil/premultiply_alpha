@@ -5,10 +5,10 @@
 #include <iostream>
 
 #define CHECK(x) if (!pma::check(&x)) { \
-    std::cout << "error algorithm\n"; \
+std::cout << "error test: " << __LINE__ << ": " << (#x) << '\n'; \
     return -1; \
 }
 
 namespace pma {
-    bool check(void (*func)(std::uint8_t*, std::size_t)) noexcept;
+    bool check(void (*func)(std::uint32_t*, std::size_t)) noexcept;
 }
