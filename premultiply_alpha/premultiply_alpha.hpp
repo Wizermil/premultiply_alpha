@@ -204,17 +204,3 @@ namespace v4 {
 #    endif
 #endif
 }
-
-// v5
-
-namespace v5 {
-    inline void premultiply_alpha_plain(std::uint32_t* data, std::size_t pixel) noexcept {
-        std::transform(data, data + pixel, data, [](std::uint32_t p) noexcept {
-            auto const a =  p >> 24;
-            auto const b = p >> 16 & 0xFFU * a / 255U;
-            auto const g = p >> 8 & 0xFFU * a / 255U;
-            auto const r = p & 0xFFU * a / 255U;
-            return a << 24 | b << 16 | g << 8 | r;
-        });
-    }
-}

@@ -37,9 +37,4 @@ Thanks chtz (stackoverflow)
 v4_simd_x86_mean       263912 ns       263844 ns          100 itr=3.79343k/s
 v4_simd_x86_median     262171 ns       262134 ns          100 itr=3.81484k/s
 v4_simd_x86_stddev       8038 ns         8012 ns          100 itr=110.046/s
-
-
-v5_plain_mean           96073 ns        96049 ns          100 itr=10.4147k/s
-v5_plain_median         95793 ns        95776 ns          100 itr=10.441k/s
-v5_plain_stddev          1752 ns         1745 ns          100 itr=186.012/s
 ```
