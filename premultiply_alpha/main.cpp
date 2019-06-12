@@ -23,6 +23,8 @@ namespace pma {
     BENCHMARK(v5_simd_x86);
 #    endif
 #endif
+
+    BENCHMARK(v6_simd);
 }
 
 int main(int argc, char** argv) {
@@ -49,6 +51,8 @@ int main(int argc, char** argv) {
     CHECK(v5::premultiply_alpha_simd_x86);
 #    endif
 #endif
+
+    CHECK(v6::premultiply_alpha_simd);
 
     ::benchmark::RunSpecifiedBenchmarks();
 }

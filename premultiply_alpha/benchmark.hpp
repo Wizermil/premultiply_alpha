@@ -5,6 +5,7 @@
 namespace pma {
     void v1_plain(benchmark::State& state) noexcept;
     void v2_plain(benchmark::State& state) noexcept;
+    void v6_simd(benchmark::State& state) noexcept;
 
 #if !defined(NSIMD)
 #    if defined(__i386__) || defined(__x86_64__)

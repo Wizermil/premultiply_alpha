@@ -33,6 +33,16 @@ namespace pma {
         delete[] data;
     }
 
+    void v6_simd(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("v6::vector ext");
+        for (auto _ : state) {
+            v6::premultiply_alpha_simd(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
 #if !defined(NSIMD)
 #    if defined(__i386__) || defined(__x86_64__)
     void v1_simd_x86(benchmark::State& state) noexcept {
