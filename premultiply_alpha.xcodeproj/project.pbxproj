@@ -637,19 +637,6 @@
 				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				WARNING_CFLAGS = (
-					"-Weverything",
-					"-Wextra",
-					"-pedantic",
-					"-Wno-c++98-compat",
-					"-Wno-c++98-compat-pedantic",
-					"-Wno-c++11-compat",
-					"-Wno-c++11-compat-pedantic",
-					"-Wno-c++14-compat",
-					"-Wno-c++14-compat-pedantic",
-					"-Wno-c++17-compat",
-					"-Wno-c++17-compat-pedantic",
-				);
 			};
 			name = Debug;
 		};
@@ -662,19 +649,6 @@
 				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				WARNING_CFLAGS = (
-					"-Weverything",
-					"-Wextra",
-					"-pedantic",
-					"-Wno-c++98-compat",
-					"-Wno-c++98-compat-pedantic",
-					"-Wno-c++11-compat",
-					"-Wno-c++11-compat-pedantic",
-					"-Wno-c++14-compat",
-					"-Wno-c++14-compat-pedantic",
-					"-Wno-c++17-compat",
-					"-Wno-c++17-compat-pedantic",
-				);
 			};
 			name = Release;
 		};
