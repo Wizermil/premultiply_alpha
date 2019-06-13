@@ -1,5 +1,3 @@
-#include <cassert>
-#include <iostream>
 #include <benchmark/benchmark.h>
 
 #include "benchmark.hpp"
