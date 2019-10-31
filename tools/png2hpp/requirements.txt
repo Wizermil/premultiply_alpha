@@ -1,4 +1,4 @@
 autopep8==1.4.4
 Click==7.0
-Pillow==6.0.0
+Pillow==6.2.0
 pycodestyle==2.5.0
