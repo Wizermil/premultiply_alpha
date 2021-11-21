@@ -15,7 +15,7 @@ namespace pma {
 
     void v1_plain(benchmark::State& state) noexcept {
         auto data = setup();
-        state.SetLabel("v1::plain");
+        state.SetLabel("plain");
         for (auto _ : state) {
             v1::premultiply_alpha_plain(data, max_pixel);
         }
@@ -25,7 +25,7 @@ namespace pma {
 
     void v2_plain(benchmark::State& state) noexcept {
         auto data = setup();
-        state.SetLabel("v2::plain - Dot and Beached (discord #include)");
+        state.SetLabel("Dot and Beached (discord #include)");
         for (auto _ : state) {
             v2::premultiply_alpha_plain(data, max_pixel);
         }
@@ -33,57 +33,53 @@ namespace pma {
         delete[] data;
     }
 
+    void v1_simd(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("simd");
+        for (auto _ : state) {
+            v1::premultiply_alpha_simd(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
+    void v3_simd(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("Peter Cordes (stackoverflow)");
+        for (auto _ : state) {
+            v3::premultiply_alpha_simd(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
+    void v4_simd(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("chtz (stackoverflow)");
+        for (auto _ : state) {
+            v4::premultiply_alpha_simd(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
+    void v5_simd(benchmark::State& state) noexcept {
+        auto data = setup();
+        state.SetLabel("avx2");
+        for (auto _ : state) {
+            v5::premultiply_alpha_simd(data, max_pixel);
+        }
+        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
+        delete[] data;
+    }
+
     void v6_simd(benchmark::State& state) noexcept {
         auto data = setup();
-        state.SetLabel("v6::vector ext");
+        state.SetLabel("ext_vector_type");
         for (auto _ : state) {
             v6::premultiply_alpha_simd(data, max_pixel);
         }
         state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
         delete[] data;
     }
-
-#if !defined(NSIMD)
-#    if defined(__i386__) || defined(__x86_64__)
-    void v1_simd_x86(benchmark::State& state) noexcept {
-        auto data = setup();
-        state.SetLabel("v1::simd_x86");
-        for (auto _ : state) {
-            v1::premultiply_alpha_simd_x86(data, max_pixel);
-        }
-        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
-        delete[] data;
-    }
-
-    void v3_simd_x86(benchmark::State& state) noexcept {
-        auto data = setup();
-        state.SetLabel("v3::simd_x86 - Peter Cordes (stackoverflow)");
-        for (auto _ : state) {
-            v3::premultiply_alpha_simd_x86(data, max_pixel);
-        }
-        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
-        delete[] data;
-    }
-
-    void v4_simd_x86(benchmark::State& state) noexcept {
-        auto data = setup();
-        state.SetLabel("v4::simd_x86 - chtz (stackoverflow)");
-        for (auto _ : state) {
-            v4::premultiply_alpha_simd_x86(data, max_pixel);
-        }
-        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
-        delete[] data;
-    }
-
-    void v5_simd_x86(benchmark::State& state) noexcept {
-        auto data = setup();
-        state.SetLabel("v5::simd_x86 - AVX2");
-        for (auto _ : state) {
-            v5::premultiply_alpha_simd_x86(data, max_pixel);
-        }
-        state.counters["itr"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
-        delete[] data;
-    }
-#    endif
-#endif
 }

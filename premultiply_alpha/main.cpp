@@ -1,28 +1,28 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
 #include <benchmark/benchmark.h>
+#pragma clang diagnostic pop
 
 #include "benchmark.hpp"
 #include "test.hpp"
 #include "premultiply_alpha.hpp"
 
 namespace pma {
-    BENCHMARK(v1_plain);
-#if !defined(NSIMD)
-#    if defined(__i386__) || defined(__x86_64__)
-    BENCHMARK(v1_simd_x86);
-#    endif
-#endif
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wglobal-constructors"
 
+    BENCHMARK(v1_plain);
     BENCHMARK(v2_plain);
 
 #if !defined(NSIMD)
-#    if defined(__i386__) || defined(__x86_64__)
-    BENCHMARK(v3_simd_x86);
-    BENCHMARK(v4_simd_x86);
-    BENCHMARK(v5_simd_x86);
-#    endif
+    BENCHMARK(v1_simd);
+    BENCHMARK(v3_simd);
+    BENCHMARK(v4_simd);
+    BENCHMARK(v5_simd);
+    BENCHMARK(v6_simd);
 #endif
 
-    BENCHMARK(v6_simd);
+#pragma clang diagnostic pop
 }
 
 int main(int argc, char** argv) {
@@ -30,27 +30,16 @@ int main(int argc, char** argv) {
     if (::benchmark::ReportUnrecognizedArguments(argc, argv))
         return 1;
 
-    CHECK(v1::premultiply_alpha_plain);
+    CHECK(v1::premultiply_alpha_plain)
+    CHECK(v2::premultiply_alpha_plain)
 
 #if !defined(NSIMD)
-#    if defined(__i386__) || defined(__x86_64__)
-    CHECK(v1::premultiply_alpha_simd_x86);
-#    endif
+    CHECK(v1::premultiply_alpha_simd)
+    CHECK(v3::premultiply_alpha_simd)
+    CHECK(v4::premultiply_alpha_simd)
+    CHECK(v5::premultiply_alpha_simd)
+    CHECK(v6::premultiply_alpha_simd)
 #endif
-
-    CHECK(v2::premultiply_alpha_plain);
-
-#if !defined(NSIMD)
-#    if defined(__i386__) || defined(__x86_64__)
-    CHECK(v3::premultiply_alpha_simd_x86);
-
-    CHECK(v4::premultiply_alpha_simd_x86);
-
-    CHECK(v5::premultiply_alpha_simd_x86);
-#    endif
-#endif
-
-    CHECK(v6::premultiply_alpha_simd);
 
     ::benchmark::RunSpecifiedBenchmarks();
 }

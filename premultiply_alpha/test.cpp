@@ -1,6 +1,7 @@
 #include "test.hpp"
 
 #include <cstring>
+#include <new>
 
 static constexpr std::uint8_t const DATA[64] {
     0xff, 0x01, 0xf1, 0x66,
@@ -55,7 +56,7 @@ static bool check(void (*func)(std::uint32_t*, std::size_t), std::uint32_t* data
 }
 
 static std::uint32_t* setup(std::uint32_t const* data, std::size_t pixel) noexcept {
-    auto sample = new std::uint32_t[pixel];
+    auto sample = new (std::align_val_t(32)) std::uint32_t[pixel];
     std::memcpy(sample, data, pixel * sizeof(std::uint32_t));
     return sample;
 }
