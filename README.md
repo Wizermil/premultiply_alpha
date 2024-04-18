@@ -1,5 +1,7 @@
 # premultiply_alpha
 
+This repository is the result of this stackoverflow [discussion](https://stackoverflow.com/questions/56430849/how-to-make-premultiplied-alpha-function-faster-using-simd-instructions)
+
 macOS 10.14.5
 MacBook Pro (15-inch, 2017)
 Intel(R) Core(TM) i7-7920HQ CPU @ 3.10GHz
